@@ -23,7 +23,7 @@ namespace Tracer
         public void StartTrace()
         {
             StackTrace stTrace = new StackTrace(true);
-            result.StartTracing(Thread.CurrentThread.ManagedThreadId, stTrace.GetFrame(0).GetMethod());
+            result.StartTracing(Thread.CurrentThread.ManagedThreadId, stTrace.GetFrame(1).GetMethod());
         }
 
         public void StopTrace()

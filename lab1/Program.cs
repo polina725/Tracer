@@ -2,23 +2,28 @@
 using System.Threading;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace Tracer
 {
     class Program
     {
 
-        private static ITracer tracer = new Tracer();
-
         static void Main(string[] args)
         {
-            tracer.StartTrace();
-            Console.WriteLine("Hello World!");
-            Thread threadOfSomeMethod = new Thread(SomeMethod);
+            Stopwatch s = new Stopwatch();
+            s.Start();
+            ITracer tracer = new Tracer();
+
+            ShortCalcClass c1 = new ShortCalcClass(tracer);
+            c1.SimpleMethod();
+
+            LongCalcClass c2 = new LongCalcClass(tracer);
+            c2.RecursiveMethod(null);
+
+            Thread threadOfSomeMethod = new Thread(c2.RecursiveMethod);
             threadOfSomeMethod.Start();
-            AnotherMethod();
             threadOfSomeMethod.Join();
-            tracer.StartTrace();
             ConcurrentDictionary<int,ThreadInfo> d = tracer.GetTraceResult().GetResults();
             foreach (KeyValuePair<int, ThreadInfo> entity in d) 
             {
@@ -27,25 +32,56 @@ namespace Tracer
             }
         }
 
-        static void SomeMethod(object countObj)
+        public class LongCalcClass
         {
-            tracer.StartTrace();
-            int count;
-            if (countObj == null)
-                count = 0;
-            else
-                count = (int)countObj + 1;
-            if (count < 5)
-                SomeMethod(count);
-            tracer.StartTrace();
+            private ITracer tracer;
+
+            public LongCalcClass(ITracer tracerObj)
+            {
+                tracer = tracerObj;
+            }
+
+            public void RecursiveMethod(object countObj)
+            {
+                tracer.StartTrace();
+                int count;
+                if (countObj == null)
+                    count = 0;
+                else
+                    count = (int)countObj + 1;
+                if (count == 1)
+                {
+                    new ShortCalcClass(tracer).AnotherSimpleMethod();
+                }
+                Console.WriteLine(count);
+                if (count < 5)
+                    RecursiveMethod(count);
+                tracer.StopTrace();
+            }
         }
 
-        static void AnotherMethod()
+        public class ShortCalcClass
         {
-            tracer.StartTrace();
-            for (int i = 0; i < 5; i++)
-                Console.WriteLine(i - 9);
-            tracer.StartTrace();
+            private ITracer tracer;
+
+            public ShortCalcClass(ITracer tracerObj)
+            {
+                tracer = tracerObj;
+            }
+
+            public void SimpleMethod()
+            {
+                tracer.StartTrace();
+                Thread.Sleep(10);
+                tracer.StopTrace();
+            }
+
+            public void AnotherSimpleMethod()
+            {
+                tracer.StartTrace();
+                Thread.Sleep(50);
+                tracer.StopTrace();
+            }
         }
 
     }

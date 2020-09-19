@@ -16,6 +16,7 @@ namespace Tracer
         {
             methods = new List<MethodInfo>();
             callStack = new Stack<MethodInfo>();
+            lifeTime = 0;
         }
 
         public void StartTracingMethod(MethodInfo method) 
@@ -30,13 +31,13 @@ namespace Tracer
 
         public void StopTracingMethod()
         {
-            callStack.Peek().Stop();
+            lifeTime += callStack.Peek().Stop();
             callStack.Pop();
         }
 
         public override string ToString()
         {
-            string str = "";
+            string str = "time : " + lifeTime + " ,methods : ";
             foreach (MethodInfo m in methods)
                 str += m.ToString();
             return str;

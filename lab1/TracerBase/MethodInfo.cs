@@ -9,8 +9,8 @@ namespace Tracer
     {
         private readonly List<MethodInfo> methods;
         private Stopwatch stopwatch;
-        private readonly String name;
-        private readonly String className;
+        private readonly string name;
+        private readonly string className;
         private long executionTime;
 
         public MethodInfo(MethodBase method)
@@ -27,17 +27,17 @@ namespace Tracer
             methods.Add(method);
         }
 
-        public void Stop()
+        public long Stop()
         {
             stopwatch.Stop();
-            executionTime = stopwatch.ElapsedMilliseconds;
+            return executionTime = stopwatch.ElapsedMilliseconds;
         }
 
         public override string ToString()
         {
-            string str = "";
-            foreach (MethodInfo m in methods)
-                str += "{ "+ m.name + " , " + className + " }, ";
+            string str = "{ " + name + " , " + className + " , " + executionTime + " } ";
+           foreach (MethodInfo m in methods)
+                str += m.ToString();
             return str;
         }
     }
