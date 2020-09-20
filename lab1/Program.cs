@@ -3,6 +3,8 @@ using System.Threading;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json;
+using System.Xml;
 
 namespace Tracer
 {
@@ -11,10 +13,9 @@ namespace Tracer
 
         static void Main(string[] args)
         {
-            Stopwatch s = new Stopwatch();
-            s.Start();
             ITracer tracer = new Tracer();
-
+            MethodInfo m = new MethodInfo(new StackFrame().GetMethod());
+            
             ShortCalcClass c1 = new ShortCalcClass(tracer);
             c1.SimpleMethod();
 
@@ -25,11 +26,8 @@ namespace Tracer
             threadOfSomeMethod.Start();
             threadOfSomeMethod.Join();
             ConcurrentDictionary<int,ThreadInfo> d = tracer.GetTraceResult().GetResults();
-            foreach (KeyValuePair<int, ThreadInfo> entity in d) 
-            {
-                ThreadInfo t = entity.Value;
-                Console.WriteLine("[ " + entity.Key + " , " + t.ToString() + " ]" );
-            }
+            CustomXmlSerializer xml = new CustomXmlSerializer();
+            xml.Serialize(tracer.GetTraceResult());
         }
 
         public class LongCalcClass
@@ -49,13 +47,13 @@ namespace Tracer
                     count = 0;
                 else
                     count = (int)countObj + 1;
+                Console.WriteLine(count);
+                if (count < 5)
+                    RecursiveMethod(count);
                 if (count == 1)
                 {
                     new ShortCalcClass(tracer).AnotherSimpleMethod();
                 }
-                Console.WriteLine(count);
-                if (count < 5)
-                    RecursiveMethod(count);
                 tracer.StopTrace();
             }
         }
@@ -73,6 +71,7 @@ namespace Tracer
             {
                 tracer.StartTrace();
                 Thread.Sleep(10);
+            //    AnotherSimpleMethod();
                 tracer.StopTrace();
             }
 

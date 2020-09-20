@@ -10,13 +10,13 @@ namespace Tracer
         private List<MethodInfo> methods;
         private Stack<MethodInfo> callStack;
 
-        private long lifeTime;
+        internal long LifeTime { get; private set; }
 
         public ThreadInfo()
         {
             methods = new List<MethodInfo>();
             callStack = new Stack<MethodInfo>();
-            lifeTime = 0;
+            LifeTime = 0;
         }
 
         public void StartTracingMethod(MethodInfo method) 
@@ -31,16 +31,13 @@ namespace Tracer
 
         public void StopTracingMethod()
         {
-            lifeTime += callStack.Peek().Stop();
+            LifeTime += callStack.Peek().Stop();
             callStack.Pop();
         }
 
-        public override string ToString()
+        public List<MethodInfo> GetMethods()
         {
-            string str = "time : " + lifeTime + " ,methods : ";
-            foreach (MethodInfo m in methods)
-                str += m.ToString();
-            return str;
+            return methods;
         }
     }
 }

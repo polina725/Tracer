@@ -8,7 +8,6 @@ namespace Tracer
     public class Tracer : ITracer
     {
         private TraceResult result;
-        public static Tracer instanceOfTracer;
 
         public Tracer()
         {
@@ -22,8 +21,7 @@ namespace Tracer
 
         public void StartTrace()
         {
-            StackTrace stTrace = new StackTrace(true);
-            result.StartTracing(Thread.CurrentThread.ManagedThreadId, stTrace.GetFrame(1).GetMethod());
+            result.StartTracing(Thread.CurrentThread.ManagedThreadId, new StackTrace().GetFrame(1).GetMethod());
         }
 
         public void StopTrace()

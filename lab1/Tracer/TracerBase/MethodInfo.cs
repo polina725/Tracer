@@ -9,15 +9,16 @@ namespace Tracer
     {
         private readonly List<MethodInfo> methods;
         private Stopwatch stopwatch;
-        private readonly string name;
-        private readonly string className;
-        private long executionTime;
+
+        internal string Name { get; }
+        internal string ClassName { get; }
+        internal long ExecutionTime { get; private set; }
 
         public MethodInfo(MethodBase method)
         {
             methods = new List<MethodInfo>();
-            name = method.Name;
-            className = method.DeclaringType.Name;
+            Name = method.Name;
+            ClassName = method.DeclaringType.Name;
             stopwatch = new Stopwatch();
             stopwatch.Start();
         }
@@ -30,15 +31,12 @@ namespace Tracer
         public long Stop()
         {
             stopwatch.Stop();
-            return executionTime = stopwatch.ElapsedMilliseconds;
-        }
-
-        public override string ToString()
+            return ExecutionTime = stopwatch.ElapsedMilliseconds;
+        }  
+        
+        public List<MethodInfo> GetMethodsList()
         {
-            string str = "{ " + name + " , " + className + " , " + executionTime + " } ";
-           foreach (MethodInfo m in methods)
-                str += m.ToString();
-            return str;
+            return methods;
         }
     }
 }
