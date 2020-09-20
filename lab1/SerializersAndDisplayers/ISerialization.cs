@@ -6,6 +6,6 @@ namespace Tracer
 {
     public interface ISerialization
     {
-        public void Serialize(TraceResult result);
+        public string Serialize(TraceResult result);
     }
 }

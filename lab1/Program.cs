@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json;
 using System.Xml;
+using System.IO;
 
 namespace Tracer
 {
@@ -26,8 +27,14 @@ namespace Tracer
             threadOfSomeMethod.Start();
             threadOfSomeMethod.Join();
             ConcurrentDictionary<int,ThreadInfo> d = tracer.GetTraceResult().GetResults();
-            CustomXmlSerializer xml = new CustomXmlSerializer();
-            xml.Serialize(tracer.GetTraceResult());
+            ISerialization serializer = new CustomXmlSerializer();
+            string str = serializer.Serialize(tracer.GetTraceResult());
+            serializer = new JsonSerialization();
+            string str1 = serializer.Serialize(tracer.GetTraceResult());
+            Displayer displ = new Displayer();
+            displ.Display(Console.Out, str1+"\n"+str);
+            displ.Display(new FileStream("methods.json",FileMode.Create),str1);
+            displ.Display(new FileStream("methods.xml",FileMode.Create),str);
         }
 
         public class LongCalcClass

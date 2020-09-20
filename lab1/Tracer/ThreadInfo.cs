@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Tracer
 {
@@ -10,13 +10,21 @@ namespace Tracer
         private List<MethodInfo> methods;
         private Stack<MethodInfo> callStack;
 
-        internal long LifeTime { get; private set; }
+        [JsonPropertyName("id")]
+        public int Id { get; private set; }
 
-        public ThreadInfo()
+        [JsonPropertyName("time")]
+        public long LifeTime { get; private set; }
+
+        [JsonPropertyName("methods")]
+        public List<MethodInfo> Methods { get { return methods; } private set { } }
+
+        public ThreadInfo(int id)
         {
             methods = new List<MethodInfo>();
             callStack = new Stack<MethodInfo>();
             LifeTime = 0;
+            Id = id;
         }
 
         public void StartTracingMethod(MethodInfo method) 

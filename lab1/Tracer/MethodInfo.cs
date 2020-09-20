@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace Tracer
 {
@@ -10,9 +11,17 @@ namespace Tracer
         private readonly List<MethodInfo> methods;
         private Stopwatch stopwatch;
 
-        internal string Name { get; }
-        internal string ClassName { get; }
-        internal long ExecutionTime { get; private set; }
+        [JsonPropertyName("name")]
+        public string Name { get; private set; }
+
+        [JsonPropertyName("class")]
+        public string ClassName { get; private set; }
+
+        [JsonPropertyName("time")]
+        public long ExecutionTime { get; private set; }
+
+        [JsonPropertyName("methods")]
+        public List<MethodInfo> Methods { get { return methods; } private set { } }
 
         public MethodInfo(MethodBase method)
         {

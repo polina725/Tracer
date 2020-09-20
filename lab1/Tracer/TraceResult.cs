@@ -15,7 +15,7 @@ namespace Tracer
 
         public void StartTracing(int threadId,MethodBase method)
         {
-            ThreadInfo currentThread = threads.GetOrAdd(threadId, new ThreadInfo());
+            ThreadInfo currentThread = threads.GetOrAdd(threadId, new ThreadInfo(threadId));
             currentThread.StartTracingMethod(new MethodInfo(method));
         }
 

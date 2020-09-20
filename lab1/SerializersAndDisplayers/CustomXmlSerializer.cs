@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.Serialization;
-using System.Collections.Concurrent;
+using System.IO;
 using System.Xml.Linq;
 
 namespace Tracer 
@@ -10,7 +8,7 @@ namespace Tracer
     class CustomXmlSerializer : ISerialization
     {
 
-        public void Serialize(TraceResult result)
+        public string Serialize(TraceResult result)
         {
             XElement root = new XElement("root");
             foreach (KeyValuePair<int, ThreadInfo> entity in result.GetResults())
@@ -20,11 +18,13 @@ namespace Tracer
                 el.SetAttributeValue("id", entity.Key);
                 el.SetAttributeValue("time", entity.Value.LifeTime);
                 if (entity.Value.GetMethods().Count != 0)
-                    tmp = SubMethod(entity.Value.GetMethods(), (XElement)el);
+                    tmp = SubMethod(entity.Value.GetMethods(), el);
                 if (tmp != null)
                     root.Add(tmp);
             }
-            Console.WriteLine(root);
+            XDocument doc = new XDocument();
+            doc.Add(root);
+            return root.ToString();
         }
 
 
