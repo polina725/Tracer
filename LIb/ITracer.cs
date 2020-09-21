@@ -1,4 +1,6 @@
-﻿namespace TracerLib
+﻿using System.Reflection;
+
+namespace Tracer
 {
     public interface ITracer
     {

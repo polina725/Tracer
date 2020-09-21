@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-//using Newtonsoft.Json;
 
-namespace Tracer
+using TracerLib;
+
+namespace SerializersAndDisplayers
 {
-    class JsonSerialization : ISerialization
+    public class JsonSerialization : ISerialization
     {
         public string Serialize(TraceResult result)
         {

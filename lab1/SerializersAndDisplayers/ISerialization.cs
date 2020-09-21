@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using TracerLib;
 
-namespace Tracer
+namespace SerializersAndDisplayers
 {
     public interface ISerialization
     {

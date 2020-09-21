@@ -1,7 +1,8 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Collections.Concurrent;
 
-namespace TracerLib
+namespace Tracer
 {
     public class TraceResult
     {

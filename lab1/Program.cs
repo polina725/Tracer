@@ -1,40 +1,44 @@
 ﻿using System;
 using System.Threading;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text.Json;
-using System.Xml;
 using System.IO;
 
-namespace Tracer
+using SerializersAndDisplayers;
+
+namespace TracerLib
 {
-    class Program
+    public class Program
     {
 
         static void Main(string[] args)
         {
             ITracer tracer = new Tracer();
-            MethodInfo m = new MethodInfo(new StackFrame().GetMethod());
             
+            Thread[] threads = {
+                                    new Thread(new LongCalcClass(tracer).ShortRecursiveMethod),
+                                    new Thread(new LongCalcClass(tracer).LongRecursiveMethod),
+                                    new Thread(new ShortCalcClass(tracer).SimpleMethodWithAnotherSimleMethod)
+                                };
+            foreach (Thread th in threads)
+                th.Start();
             ShortCalcClass c1 = new ShortCalcClass(tracer);
             c1.SimpleMethod();
 
             LongCalcClass c2 = new LongCalcClass(tracer);
-            c2.RecursiveMethod(null);
+            c2.ShortRecursiveMethod(null);
 
-            Thread threadOfSomeMethod = new Thread(c2.RecursiveMethod);
-            threadOfSomeMethod.Start();
-            threadOfSomeMethod.Join();
-            ConcurrentDictionary<int,ThreadInfo> d = tracer.GetTraceResult().GetResults();
+            foreach (Thread th in threads)
+                th.Join();
+
             ISerialization serializer = new CustomXmlSerializer();
-            string str = serializer.Serialize(tracer.GetTraceResult());
+            string xmlStr = serializer.Serialize(tracer.GetTraceResult());
+
             serializer = new JsonSerialization();
-            string str1 = serializer.Serialize(tracer.GetTraceResult());
+            string jsonStr = serializer.Serialize(tracer.GetTraceResult());
+
             Displayer displ = new Displayer();
-            displ.Display(Console.Out, str1+"\n"+str);
-            displ.Display(new FileStream("methods.json",FileMode.Create),str1);
-            displ.Display(new FileStream("methods.xml",FileMode.Create),str);
+            displ.Display(Console.Out, jsonStr + "\n" + xmlStr);
+            displ.Display(new FileStream("methods.json", FileMode.Create), jsonStr);
+            displ.Display(new FileStream("methods.xml", FileMode.Create), xmlStr);
         }
 
         public class LongCalcClass
@@ -46,7 +50,21 @@ namespace Tracer
                 tracer = tracerObj;
             }
 
-            public void RecursiveMethod(object countObj)
+            public void ShortRecursiveMethod(object countObj)
+            {
+                tracer.StartTrace();
+                Thread.Sleep(1);
+                int count;
+                if (countObj == null)
+                    count = 0;
+                else
+                    count = (int)countObj + 1;
+                if (count < 5)
+                    ShortRecursiveMethod(count);
+                tracer.StopTrace();
+            }
+
+            public void LongRecursiveMethod(object countObj)
             {
                 tracer.StartTrace();
                 int count;
@@ -54,12 +72,12 @@ namespace Tracer
                     count = 0;
                 else
                     count = (int)countObj + 1;
-                Console.WriteLine(count);
-                if (count < 5)
-                    RecursiveMethod(count);
-                if (count == 1)
-                {
+                if (count % 2 == 0)
                     new ShortCalcClass(tracer).AnotherSimpleMethod();
+                if (count < 5)
+                {
+                    Console.WriteLine("work " + count);
+                    LongRecursiveMethod(count);
                 }
                 tracer.StopTrace();
             }
@@ -77,15 +95,30 @@ namespace Tracer
             public void SimpleMethod()
             {
                 tracer.StartTrace();
-                Thread.Sleep(10);
-            //    AnotherSimpleMethod();
+                Thread.Sleep(20);
+                tracer.StopTrace();
+            }
+
+            public void SimpleMethodWithAnotherSimleMethod()
+            {
+                tracer.StartTrace();
+                AnotherSimpleMethod();
+                Thread.Sleep(50);
                 tracer.StopTrace();
             }
 
             public void AnotherSimpleMethod()
             {
                 tracer.StartTrace();
-                Thread.Sleep(50);
+                Thread.Sleep(5);
+                tracer.StopTrace();
+            }
+
+            public void SimpleMethodWithShortRecursiveMethod()
+            {
+                tracer.StartTrace();
+                new LongCalcClass(tracer).ShortRecursiveMethod(null);
+                Thread.Sleep(10);
                 tracer.StopTrace();
             }
         }
