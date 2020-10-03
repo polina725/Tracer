@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 using TracerLib;
 using SerializersAndDisplayers;
+using System.Collections.Generic;
 
 namespace Testing
 {
@@ -57,6 +58,30 @@ namespace Testing
             threads[0].Join();
             threads[1].Join();
             Assert.AreEqual(3, tracer.GetTraceResult().GetResults().Count);
+        }
+
+        [TestMethod]
+        public void OneThreadWithTimeChecking()
+        {
+            longCalc.ShortRecursiveMethod(null);
+            string xml = serializer.Serialize(tracer.GetTraceResult());
+            bool timeCorrect = true;
+            foreach(var pair in tracer.GetTraceResult().GetResults())
+                if (pair.Value.Methods.Count != 0)
+                    CheckTime(pair.Value.Methods,timeCorrect);
+            Assert.IsTrue(timeCorrect);
+        }
+
+        private bool CheckTime(List<MethodInfo> methodsList,bool timeCorrect)
+        {
+            foreach(MethodInfo m in methodsList)
+            {
+                if (m.Methods.Count != 0)
+                    CheckTime(m.Methods,timeCorrect);
+                if (m.ExecutionTime < 10 || !timeCorrect)
+                    return timeCorrect && false;
+            }
+            return timeCorrect && true;
         }
     }
 }

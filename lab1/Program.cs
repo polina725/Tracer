@@ -3,6 +3,7 @@ using System.Threading;
 using System.IO;
 
 using SerializersAndDisplayers;
+using System.Diagnostics;
 
 namespace TracerLib
 {
@@ -12,7 +13,7 @@ namespace TracerLib
         static void Main(string[] args)
         {
             ITracer tracer = new Tracer();
-            
+
             Thread[] threads = {
                                     new Thread(new LongCalcClass(tracer).ShortRecursiveMethod),
                                     new Thread(new LongCalcClass(tracer).LongRecursiveMethod),
@@ -53,7 +54,7 @@ namespace TracerLib
             public void ShortRecursiveMethod(object countObj)
             {
                 tracer.StartTrace();
-                Thread.Sleep(1);
+                Thread.Sleep(10);
                 int count;
                 if (countObj == null)
                     count = 0;
@@ -67,6 +68,7 @@ namespace TracerLib
             public void LongRecursiveMethod(object countObj)
             {
                 tracer.StartTrace();
+                Thread.Sleep(2);
                 int count;
                 if (countObj == null)
                     count = 0;
